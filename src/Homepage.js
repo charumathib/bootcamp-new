@@ -4,63 +4,34 @@ import { firebaseConnect, isLoaded } from 'react-redux-firebase';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 
-class Homepage extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {};
+const Homepage = props => {
+  if (!isLoaded(props.homepage)) {
+    return <div>Loading data...</div>;
   }
 
-  async componentDidMount() {
-    const getHomepage = this.props.firebase
-      .functions()
-      .httpsCallable('getHomepage');
-    const homepage = await getHomepage();
-    this.setState({ homepage: homepage.data });
-  }
-
-  render() {
-    if (!isLoaded(this.state.homepage)) {
-      return <div>Loading...</div>;
-    }
-
-    const decks = Object.keys(this.state.homepage).map(deckId => {
-      const deck = this.state.homepage[deckId];
-      return (
-        <div key={deckId}>
-          <Link to={`/viewer/${deckId}`}>{deck.name}</Link>
-        </div>
-      );
-    });
-
+  const decks = Object.keys(props.homepage).map(deckId => {
     return (
-      <div>
-        <h2>Homepage</h2>
-        <Link to="/editor">Create a new flashcards deck!</Link>
-        <h3>Flashcards</h3>
-        {decks}
-        <h3>Account</h3>
-        {this.props.isLoggedIn ? (
-          <div>
-            <div>{this.props.email}</div>
-            <button onClick={() => this.props.firebase.logout()}>Logout</button>
-          </div>
-        ) : (
-          <div>
-            <Link to="/register">Register</Link>
-            <br />
-            <Link to="/login">Login</Link>
-          </div>
-        )}
+      <div key={deckId}>
+        <Link to={`/viewer/${deckId}`}>{props.homepage[deckId].name}</Link>
       </div>
     );
-  }
-}
+  });
 
-const mapStateToProps = state => {
-  return {
-    email: state.firebase.auth.email,
-    isLoggedIn: state.firebase.auth.uid,
-  };
+  return (
+    <div>
+      <h2>Homepage</h2>
+      <Link to="/editor">Create a new deck!</Link>
+      <h3>My decks</h3>
+      {decks}
+    </div>
+  );
 };
 
-export default compose(firebaseConnect(), connect(mapStateToProps))(Homepage);
+const mapStateToProps = state => {
+  return { homepage: state.firebase.data.homepage };
+};
+
+export default compose(
+  firebaseConnect(['/homepage']),
+  connect(mapStateToProps),
+)(Homepage);

@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "predeploy": "npm run build",
+    "site": "bootcamp-charu",
     "public": "build",
     "ignore": [
       "firebase.json",
@@ -13,8 +13,5 @@
         "destination": "/index.html"
       }
     ]
-  },
-  "database": {
-    "rules": "database.rules.json"
   }
 }
